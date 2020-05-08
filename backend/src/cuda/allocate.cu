@@ -10,7 +10,7 @@ namespace se {
 template<typename OctreeT>
 __global__ static void buildAllocationListKernel(
     BufferAccessor<se::key_t> allocation_list, OctreeT octree, int* voxel_count,
-    Eigen::Matrix4f pose, Eigen::Matrix4f K, BufferAccessorCUDA<float> depth,
+    Eigen::Matrix4f pose, Eigen::Matrix4f K, BufferAccessor<float> depth,
     Eigen::Vector2i frame_size, float mu) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -26,7 +26,7 @@ __global__ static void buildAllocationListKernel(
     const float voxel_size         = octree.dim() / octree.size();
     const float inverse_voxel_size = 1.f / voxel_size;
 
-    const float depth_sample = *depth[x + y * frame_size.x()];
+    const float depth_sample = depth[x + y * frame_size.x()];
     if (depth_sample == 0) return;
 
     const Eigen::Vector3f camera_pos = pose.topRightCorner<3, 1>();
@@ -47,8 +47,7 @@ __global__ static void buildAllocationListKernel(
 int buildAllocationList(BufferAccessor<se::key_t> allocation_list,
     const Octree<FieldType, MemoryPoolCUDA>& octree, int* voxel_count,
     const Eigen::Matrix4f& pose, const Eigen::Matrix4f& K,
-    BufferAccessorCUDA<float> depth, const Eigen::Vector2i& frame_size,
-    float mu) {
+    BufferAccessor<float> depth, const Eigen::Vector2i& frame_size, float mu) {
     constexpr int thread_dim = 16;
 
     dim3 threads(thread_dim, thread_dim);

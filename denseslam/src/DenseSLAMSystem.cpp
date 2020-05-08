@@ -88,7 +88,8 @@ bool DenseSLAMSystem::preprocessing(const unsigned short* inputDepth,
         bilateralFilterKernel(
             float_depth_filtered_, float_depth_, gaussian_, e_delta, radius);
     } else {
-        std::memcpy(float_depth_filtered_.data(), float_depth_.data(),
+        std::memcpy(float_depth_filtered_.accessor(se::Device::CPU).data(),
+            float_depth_.accessor(se::Device::CPU).data(),
             sizeof(float) * computation_size_.x() * computation_size_.y());
     }
 
@@ -141,8 +142,8 @@ void DenseSLAMSystem::renderTrack(
 
 void DenseSLAMSystem::renderDepth(
     unsigned char* out, const Eigen::Vector2i& outputSize) {
-    renderDepthKernel(
-        out, float_depth_.data(), outputSize, nearPlane, farPlane);
+    renderDepthKernel(out, float_depth_.accessor(se::Device::CPU).data(),
+        outputSize, nearPlane, farPlane);
 }
 
 void DenseSLAMSystem::dump_mesh(const std::string) {

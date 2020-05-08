@@ -35,9 +35,9 @@
 
 #include <supereight/image/image.hpp>
 
+#include <supereight/shared/commons.h>
 #include <supereight/shared/perfstats.h>
 #include <supereight/shared/timings.h>
-#include <supereight/shared/commons.h>
 
 #include <supereight/utils/math_utils.h>
 
@@ -73,16 +73,22 @@ static inline Eigen::Matrix<float, 6, 1> solve(
 void depth2vertexKernel(se::Image<Eigen::Vector3f>& vertex,
     se::Image<float>& depth, const Eigen::Matrix4f& invK) {
     TICK();
+
+    auto vertex_accessor = vertex.accessor(se::Device::CPU);
+    auto depth_accessor  = depth.accessor(se::Device::CPU);
+
     int x, y;
-#pragma omp parallel for shared(vertex), private(x, y)
+#pragma omp parallel for shared(vertex_accessor), private(x, y)
     for (y = 0; y < depth.height(); y++) {
         for (x = 0; x < depth.width(); x++) {
-            if (depth[x + y * depth.width()] > 0) {
-                vertex[x + y * depth.width()] = (depth[x + y * depth.width()] *
-                    invK * Eigen::Vector4f(x, y, 1.f, 0.f))
-                                                    .head<3>();
+            if (depth_accessor[x + y * depth.width()] > 0) {
+                vertex_accessor[x + y * depth.width()] =
+                    (depth_accessor[x + y * depth.width()] * invK *
+                        Eigen::Vector4f(x, y, 1.f, 0.f))
+                        .head<3>();
             } else {
-                vertex[x + y * depth.width()] = Eigen::Vector3f::Constant(0);
+                vertex_accessor[x + y * depth.width()] =
+                    Eigen::Vector3f::Constant(0);
             }
         }
     }
@@ -96,12 +102,16 @@ void vertex2normalKernel(
     int x, y;
     int width  = in.width();
     int height = in.height();
-#pragma omp parallel for shared(out), private(x, y)
+
+    auto out_accessor = out.accessor(se::Device::CPU);
+    auto in_accessor  = in.accessor(se::Device::CPU);
+
+#pragma omp parallel for shared(out_accessor), private(x, y)
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
-            const Eigen::Vector3f center = in[x + width * y];
+            const Eigen::Vector3f center = in_accessor[x + width * y];
             if (center.z() == 0.f) {
-                out[x + y * width].x() = INVALID;
+                out_accessor[x + y * width].x() = INVALID;
                 continue;
             }
 
@@ -120,19 +130,22 @@ void vertex2normalKernel(
                 pup   = Eigen::Vector2i(x, std::min(y + 1, ((int) height) - 1));
             }
 
-            const Eigen::Vector3f left  = in[pleft.x() + width * pleft.y()];
-            const Eigen::Vector3f right = in[pright.x() + width * pright.y()];
-            const Eigen::Vector3f up    = in[pup.x() + width * pup.y()];
-            const Eigen::Vector3f down  = in[pdown.x() + width * pdown.y()];
+            const Eigen::Vector3f left =
+                in_accessor[pleft.x() + width * pleft.y()];
+            const Eigen::Vector3f right =
+                in_accessor[pright.x() + width * pright.y()];
+            const Eigen::Vector3f up = in_accessor[pup.x() + width * pup.y()];
+            const Eigen::Vector3f down =
+                in_accessor[pdown.x() + width * pdown.y()];
 
             if (left.z() == 0 || right.z() == 0 || up.z() == 0 ||
                 down.z() == 0) {
-                out[x + y * width].x() = INVALID;
+                out_accessor[x + y * width].x() = INVALID;
                 continue;
             }
-            const Eigen::Vector3f dxv = right - left;
-            const Eigen::Vector3f dyv = up - down;
-            out[x + y * width]        = dxv.cross(dyv).normalized();
+            const Eigen::Vector3f dxv   = right - left;
+            const Eigen::Vector3f dyv   = up - down;
+            out_accessor[x + y * width] = dxv.cross(dyv).normalized();
         }
     }
     TOCK("vertex2normalKernel", width * height);
@@ -290,22 +303,26 @@ void reduceKernel(float* out, se::TrackData* J, const Eigen::Vector2i& Jsize,
     TOCK("reduceKernel", 512);
 }
 
-void trackKernel(se::TrackData* output,
-    se::Image<Eigen::Vector3f>& inVertex,
-    se::Image<Eigen::Vector3f>& inNormal,
-    se::Image<Eigen::Vector3f>& refVertex,
-    se::Image<Eigen::Vector3f>& refNormal, const Eigen::Matrix4f& Ttrack,
+void trackKernel(se::TrackData* output, se::Image<Eigen::Vector3f>& in_vertex,
+    se::Image<Eigen::Vector3f>& in_normal,
+    se::Image<Eigen::Vector3f>& ref_vertex,
+    se::Image<Eigen::Vector3f>& ref_normal, const Eigen::Matrix4f& Ttrack,
     const Eigen::Matrix4f& view, const float dist_threshold,
     const float normal_threshold) {
     TICK();
 
     Eigen::Vector2i pixel(0, 0);
-    Eigen::Vector2i inSize(inVertex.width(), inVertex.height());
-    Eigen::Vector2i refSize(refVertex.width(), refVertex.height());
+    Eigen::Vector2i inSize(in_vertex.width(), in_vertex.height());
+    Eigen::Vector2i refSize(ref_vertex.width(), ref_vertex.height());
+
+    auto in_vertex_accessor  = in_vertex.accessor(se::Device::CPU);
+    auto in_normal_accessor  = in_normal.accessor(se::Device::CPU);
+    auto ref_vertex_accessor = ref_vertex.accessor(se::Device::CPU);
+    auto ref_normal_accessor = ref_normal.accessor(se::Device::CPU);
 
     int pixely, pixelx;
 
-#pragma omp parallel for shared(output), private(pixel, pixelx, pixely)
+// #pragma omp parallel for shared(output), private(pixel, pixelx, pixely)
     for (pixely = 0; pixely < inSize.y(); pixely++) {
         for (pixelx = 0; pixelx < inSize.x(); pixelx++) {
             pixel.x() = pixelx;
@@ -313,13 +330,15 @@ void trackKernel(se::TrackData* output,
 
             se::TrackData& row = output[pixel.x() + pixel.y() * refSize.x()];
 
-            if (inNormal[pixel.x() + pixel.y() * inSize.x()].x() == INVALID) {
+            if (in_normal_accessor[pixel.x() + pixel.y() * inSize.x()].x() ==
+                INVALID) {
                 row.result = -1;
                 continue;
             }
 
             const Eigen::Vector3f projectedVertex = (Ttrack *
-                inVertex[pixel.x() + pixel.y() * inSize.x()].homogeneous())
+                in_vertex_accessor[pixel.x() + pixel.y() * inSize.x()]
+                    .homogeneous())
                                                         .head<3>();
             const Eigen::Vector3f projectedPos =
                 (view * projectedVertex.homogeneous()).head<3>();
@@ -336,7 +355,7 @@ void trackKernel(se::TrackData* output,
 
             const Eigen::Vector2i refPixel = projPixel.cast<int>();
             const Eigen::Vector3f referenceNormal =
-                refNormal[refPixel.x() + refPixel.y() * refSize.x()];
+                ref_normal_accessor[refPixel.x() + refPixel.y() * refSize.x()];
 
             if (referenceNormal.x() == INVALID) {
                 row.result = -3;
@@ -344,12 +363,12 @@ void trackKernel(se::TrackData* output,
             }
 
             const Eigen::Vector3f diff =
-                refVertex[refPixel.x() + refPixel.y() * refSize.x()] -
+                ref_vertex_accessor[refPixel.x() + refPixel.y() * refSize.x()] -
                 projectedVertex;
 
             const Eigen::Vector3f projectedNormal =
                 Ttrack.topLeftCorner<3, 3>() *
-                inNormal[pixel.x() + pixel.y() * inSize.x()];
+                in_normal_accessor[pixel.x() + pixel.y() * inSize.x()];
 
             if (diff.norm() > dist_threshold) {
                 row.result = -4;
@@ -416,15 +435,19 @@ bool checkPoseKernel(Eigen::Matrix4f& pose, Eigen::Matrix4f& oldPose,
     return true;
 }
 
-void halfSampleRobustImageKernel(se::Image<float>& out,
-    se::Image<float>& in, const float e_d, const int r) {
+void halfSampleRobustImageKernel(
+    se::Image<float>& out, se::Image<float>& in, const float e_d, const int r) {
     if ((in.width() / out.width() != 2) || (in.height() / out.height() != 2)) {
         std::cerr << "Invalid ratio." << std::endl;
         exit(1);
     }
     TICK();
+
+    auto out_accessor = out.accessor(se::Device::CPU);
+    auto in_accessor  = in.accessor(se::Device::CPU);
+
     int y;
-#pragma omp parallel for shared(out), private(y)
+#pragma omp parallel for shared(out_accessor), private(y)
     for (y = 0; y < out.height(); y++) {
         for (int x = 0; x < out.width(); x++) {
             Eigen::Vector2i pixel             = Eigen::Vector2i(x, y);
@@ -433,21 +456,21 @@ void halfSampleRobustImageKernel(se::Image<float>& out,
             float sum = 0.0f;
             float t   = 0.0f;
             const float center =
-                in[centerPixel.x() + centerPixel.y() * in.width()];
+                in_accessor[centerPixel.x() + centerPixel.y() * in.width()];
             for (int i = -r + 1; i <= r; ++i) {
                 for (int j = -r + 1; j <= r; ++j) {
                     Eigen::Vector2i cur = centerPixel + Eigen::Vector2i(j, i);
                     se::math::clamp(cur, Eigen::Vector2i::Constant(0),
                         Eigen::Vector2i(
                             2 * out.width() - 1, 2 * out.height() - 1));
-                    float current = in[cur.x() + cur.y() * in.width()];
+                    float current = in_accessor[cur.x() + cur.y() * in.width()];
                     if (fabsf(current - center) < e_d) {
                         sum += 1.0f;
                         t += current;
                     }
                 }
             }
-            out[pixel.x() + pixel.y() * out.width()] = t / sum;
+            out_accessor[pixel.x() + pixel.y() * out.width()] = t / sum;
         }
     }
     TOCK("halfSampleRobustImageKernel", outSize.x * outSize.y);

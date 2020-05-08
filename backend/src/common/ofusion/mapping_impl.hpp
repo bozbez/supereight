@@ -49,6 +49,7 @@ namespace se {
  * should be computed.
  * \return The value of the interpolated depth at proj.
  */
+/*
 SE_DEVICE_FUNC
 inline float interpDepth(se::Image<float>& depth, const Eigen::Vector2f& proj) {
     // https://en.wikipedia.org/wiki/Bilinear_interpolation
@@ -89,6 +90,7 @@ inline float interpDepth(se::Image<float>& depth, const Eigen::Vector2f& proj) {
         return depth[int(proj.x() + 0.5f) + int(proj.y() + 0.5f) * width];
     }
 }
+*/
 
 /**
  * Compute the value of the q_cdf spline using a lookup table. This implements

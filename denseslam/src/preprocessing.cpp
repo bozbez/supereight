@@ -49,28 +49,33 @@ void bilateralFilterKernel(se::Image<float>& out, se::Image<float>& in,
     TICK()
     const int width  = in.width();
     const int height = in.height();
+
+    auto out_accessor = out.accessor(se::Device::CPU);
+    auto in_accessor  = in.accessor(se::Device::CPU);
+
     int y;
     float e_d_squared_2 = e_d * e_d * 2;
-#pragma omp parallel for shared(out), private(y)
+#pragma omp parallel for shared(out_accessor), private(y)
     for (y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             unsigned int pos = x + y * width;
-            if (in[pos] == 0) {
-                out[pos] = 0;
+            if (in_accessor[pos] == 0) {
+                out_accessor[pos] = 0;
                 continue;
             }
 
             float sum = 0.0f;
             float t   = 0.0f;
 
-            const float center = in[pos];
+            const float center = in_accessor[pos];
 
             for (int i = -r; i <= r; ++i) {
                 for (int j = -r; j <= r; ++j) {
                     Eigen::Vector2i curPos =
                         Eigen::Vector2i(se::math::clamp(x + i, 0, width - 1),
                             se::math::clamp(y + j, 0, height - 1));
-                    const float curPix = in[curPos.x() + curPos.y() * width];
+                    const float curPix =
+                        in_accessor[curPos.x() + curPos.y() * width];
                     if (curPix > 0) {
                         const float mod    = se::math::sq(curPix - center);
                         const float factor = gaussian[i + r] * gaussian[j + r] *
@@ -80,7 +85,7 @@ void bilateralFilterKernel(se::Image<float>& out, se::Image<float>& in,
                     }
                 }
             }
-            out[pos] = t / sum;
+            out_accessor[pos] = t / sum;
         }
     }
     TOCK("bilateralFilterKernel", width * height);
@@ -106,10 +111,13 @@ void mm2metersKernel(se::Image<float>& out, const unsigned short* in,
 
     int ratio = inputSize.x() / out.width();
     int y;
-#pragma omp parallel for shared(out), private(y)
+
+    auto out_accessor = out.accessor(se::Device::CPU);
+
+#pragma omp parallel for shared(out_accessor), private(y)
     for (y = 0; y < out.height(); y++)
         for (int x = 0; x < out.width(); x++) {
-            out[x + out.width() * y] =
+            out_accessor[x + out.width() * y] =
                 in[x * ratio + inputSize.x() * y * ratio] / 1000.0f;
         }
     TOCK("mm2metersKernel", outSize.x * outSize.y);

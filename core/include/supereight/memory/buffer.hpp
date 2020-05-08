@@ -27,8 +27,7 @@ public:
         if (allocated_) free_(buffer_);
     }
 
-    __attribute__((always_inline))
-    BufferAccessor<T> accessor(Device device) {
+    __attribute__((always_inline)) BufferAccessor<T> accessor(Device device) {
         switch (device) {
         case Device::CPU: return this->template accessor<Device::CPU>();
         case Device::CUDA: return this->template accessor<Device::CUDA>();
@@ -64,6 +63,8 @@ public:
     }
 
     void resize(std::size_t size) {
+        if (size == size_) return;
+
         if (allocated_) free_(buffer_);
         allocated_ = false;
 
@@ -91,6 +92,9 @@ private:
 template<typename T>
 template<Device D>
 inline void Buffer<T>::move_buffer() {
+    std::printf("moving %d -> %d, size = %d (%d bytes)\n", D, device_, size_,
+        size_ * sizeof(T));
+
     if (D == Device::CPU) {
         T* cpu_buffer = buffer_traits<Device::CPU>::allocate<T>(size_);
         to_cpu_(cpu_buffer, buffer_, size_);

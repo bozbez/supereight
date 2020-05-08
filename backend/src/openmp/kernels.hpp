@@ -102,10 +102,14 @@ static void raycastKernel(const OctreeT<FieldType, BufferT>& octree,
     const Eigen::Matrix4f& view, const float nearPlane, const float farPlane,
     const float mu, const float step, const float largestep) {
     TICK();
+
+    auto vertex_accessor = vertex.accessor(Device::CPU);
+    auto normal_accessor = normal.accessor(Device::CPU);
+
     int y;
-#pragma omp parallel for shared(normal, vertex), private(y)
+#pragma omp parallel for shared(normal_accessor, vertex_accessor), private(y)
     for (y = 0; y < vertex.height(); y++)
-// #pragma omp simd
+        // #pragma omp simd
         for (int x = 0; x < vertex.width(); x++) {
             Eigen::Vector2i pos(x, y);
             const Eigen::Vector3f dir =
@@ -122,7 +126,7 @@ static void raycastKernel(const OctreeT<FieldType, BufferT>& octree,
                       ray.tmax(), mu, step, largestep)
                 : Eigen::Vector4f::Constant(0.f);
             if (hit.w() > 0.0) {
-                vertex[x + y * vertex.width()] = hit.head<3>();
+                vertex_accessor[x + y * vertex.width()] = hit.head<3>();
 
                 const float inverseVoxelSize = octree.size() / octree.dim();
                 Eigen::Vector3f surfNorm =
@@ -131,20 +135,20 @@ static void raycastKernel(const OctreeT<FieldType, BufferT>& octree,
 
                 if (surfNorm.norm() == 0) {
                     // normal[pos] = normalize(surfNorm); // APN added
-                    normal[pos.x() + pos.y() * normal.width()] =
+                    normal_accessor[pos.x() + pos.y() * normal.width()] =
                         Eigen::Vector3f(INVALID, 0, 0);
                 } else {
                     // Invert normals if SDF
                     if (voxel_traits<FieldType>::invert_normals)
                         surfNorm *= -1.f;
 
-                    normal[pos.x() + pos.y() * normal.width()] =
+                    normal_accessor[pos.x() + pos.y() * normal.width()] =
                         surfNorm.normalized();
                 }
             } else {
-                vertex[pos.x() + pos.y() * vertex.width()] =
+                vertex_accessor[pos.x() + pos.y() * vertex.width()] =
                     Eigen::Vector3f::Constant(0);
-                normal[pos.x() + pos.y() * normal.width()] =
+                normal_accessor[pos.x() + pos.y() * normal.width()] =
                     Eigen::Vector3f(INVALID, 0, 0);
             }
         }
@@ -159,9 +163,12 @@ static void renderVolumeKernel(const OctreeT<FieldType, BufferT>& octree,
     const float nearPlane, const float farPlane, const float mu,
     const float step, const float largestep, const Eigen::Vector3f& light,
     const Eigen::Vector3f& ambient, bool render,
-    se::Image<Eigen::Vector3f>& vertex,
-    se::Image<Eigen::Vector3f>& normal) {
+    se::Image<Eigen::Vector3f>& vertex, se::Image<Eigen::Vector3f>& normal) {
     TICK();
+
+    auto vertex_accessor = vertex.accessor(Device::CPU);
+    auto normal_accessor = normal.accessor(Device::CPU);
+
     int y;
 #pragma omp parallel for shared(out), private(y)
     for (y = 0; y < depthSize.y(); y++) {
@@ -196,8 +203,8 @@ static void renderVolumeKernel(const OctreeT<FieldType, BufferT>& octree,
                     surfNorm = Eigen::Vector3f(INVALID, 0, 0);
                 }
             } else {
-                test     = vertex[x + depthSize.x() * y];
-                surfNorm = normal[x + depthSize.x() * y];
+                test     = vertex_accessor[x + depthSize.x() * y];
+                surfNorm = normal_accessor[x + depthSize.x() * y];
             }
 
             if (surfNorm.x() != INVALID && surfNorm.norm() > 0) {

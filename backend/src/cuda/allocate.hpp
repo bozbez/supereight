@@ -36,7 +36,6 @@
 
 #pragma once
 
-#include <supereight/backend/buffer_cuda.hpp>
 #include <supereight/backend/fields.hpp>
 #include <supereight/backend/memory_pool_cuda.hpp>
 #include <supereight/memory/buffer.hpp>
@@ -49,7 +48,6 @@ namespace se {
 int buildAllocationList(BufferAccessor<se::key_t> allocation_list,
     const Octree<FieldType, MemoryPoolCUDA>& octree, int* voxel_count,
     const Eigen::Matrix4f& pose, const Eigen::Matrix4f& K,
-    BufferAccessorCUDA<float> depth, const Eigen::Vector2i& frame_size,
-    float mu);
+    BufferAccessor<float> depth, const Eigen::Vector2i& frame_size, float mu);
 
 } // namespace se

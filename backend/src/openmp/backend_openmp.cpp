@@ -19,7 +19,8 @@ void Backend::allocate_(Image<float>& depth, const Eigen::Vector4f& k,
     int allocated;
     buildAllocationListKernel(allocation_list_.data(),
         allocation_list_.capacity(), allocated, octree_, pose,
-        getCameraMatrix(k), depth.data(), computation_size, mu);
+        getCameraMatrix(k), depth.accessor(Device::CPU).data(),
+        computation_size, mu);
 
     octree_.allocate(allocation_list_.data(), allocated);
 }
@@ -31,7 +32,8 @@ void Backend::update_(Image<float>& depth, const Sophus::SE3f& Tcw,
     float timestamp  = (1.f / 30.f) * frame;
 
     voxel_traits<FieldType>::update_func_type funct(
-        depth.data(), computation_size, mu, timestamp, voxel_size);
+        depth.accessor(Device::CPU).data(), computation_size, mu, timestamp,
+        voxel_size);
 
     se::functor::projective_map(
         octree_, Tcw, getCameraMatrix(k), computation_size, funct);
@@ -48,8 +50,8 @@ void Backend::raycast_(Image<Eigen::Vector3f>& vertex,
 
 void Backend::render_(unsigned char* out, const Eigen::Vector2i& output_size,
     const Eigen::Vector4f& k, const Eigen::Matrix4f& pose, float large_step,
-    float mu, Image<Eigen::Vector3f>& vertex,
-    Image<Eigen::Vector3f>& normal, const Eigen::Matrix4f& raycast_pose) {
+    float mu, Image<Eigen::Vector3f>& vertex, Image<Eigen::Vector3f>& normal,
+    const Eigen::Matrix4f& raycast_pose) {
     float step = octree_.dim() / octree_.size();
 
     renderVolumeKernel(octree_, out, output_size,

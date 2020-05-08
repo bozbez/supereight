@@ -37,7 +37,8 @@ bool Tracker::track(const Eigen::Vector4f& k, se::Image<float>& input_depth,
     float icp_threshold, const Eigen::Matrix4f& render_pose,
     se::Image<Eigen::Vector3f>& rendered_vertex,
     se::Image<Eigen::Vector3f>& rendered_normal) {
-    std::memcpy(scaled_depth_[0].data(), input_depth.data(),
+    std::memcpy(scaled_depth_[0].accessor(Device::CPU).data(),
+        input_depth.accessor(Device::CPU).data(),
         sizeof(float) * computation_size_.x() * computation_size_.y());
 
     // Half sample input depth maps into the pyramid levels
