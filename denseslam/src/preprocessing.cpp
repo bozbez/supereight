@@ -39,7 +39,7 @@
 #include <functional>
 #include <supereight/image/image.hpp>
 
-void bilateralFilterKernel(se::Image<float>& out, const se::Image<float>& in,
+void bilateralFilterKernel(se::Image<float>& out, se::Image<float>& in,
     const std::vector<float>& gaussian, float e_d, int r) {
     if ((in.width() != out.width()) || in.height() != out.height()) {
         std::cerr << "input/output image sizes differ." << std::endl;

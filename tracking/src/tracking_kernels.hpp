@@ -71,7 +71,7 @@ static inline Eigen::Matrix<float, 6, 1> solve(
 }
 
 void depth2vertexKernel(se::Image<Eigen::Vector3f>& vertex,
-    const se::Image<float>& depth, const Eigen::Matrix4f& invK) {
+    se::Image<float>& depth, const Eigen::Matrix4f& invK) {
     TICK();
     int x, y;
 #pragma omp parallel for shared(vertex), private(x, y)
@@ -91,7 +91,7 @@ void depth2vertexKernel(se::Image<Eigen::Vector3f>& vertex,
 
 template<bool NegY>
 void vertex2normalKernel(
-    se::Image<Eigen::Vector3f>& out, const se::Image<Eigen::Vector3f>& in) {
+    se::Image<Eigen::Vector3f>& out, se::Image<Eigen::Vector3f>& in) {
     TICK();
     int x, y;
     int width  = in.width();
@@ -291,10 +291,10 @@ void reduceKernel(float* out, se::TrackData* J, const Eigen::Vector2i& Jsize,
 }
 
 void trackKernel(se::TrackData* output,
-    const se::Image<Eigen::Vector3f>& inVertex,
-    const se::Image<Eigen::Vector3f>& inNormal,
-    const se::Image<Eigen::Vector3f>& refVertex,
-    const se::Image<Eigen::Vector3f>& refNormal, const Eigen::Matrix4f& Ttrack,
+    se::Image<Eigen::Vector3f>& inVertex,
+    se::Image<Eigen::Vector3f>& inNormal,
+    se::Image<Eigen::Vector3f>& refVertex,
+    se::Image<Eigen::Vector3f>& refNormal, const Eigen::Matrix4f& Ttrack,
     const Eigen::Matrix4f& view, const float dist_threshold,
     const float normal_threshold) {
     TICK();
@@ -417,7 +417,7 @@ bool checkPoseKernel(Eigen::Matrix4f& pose, Eigen::Matrix4f& oldPose,
 }
 
 void halfSampleRobustImageKernel(se::Image<float>& out,
-    const se::Image<float>& in, const float e_d, const int r) {
+    se::Image<float>& in, const float e_d, const int r) {
     if ((in.width() / out.width() != 2) || (in.height() / out.height() != 2)) {
         std::cerr << "Invalid ratio." << std::endl;
         exit(1);

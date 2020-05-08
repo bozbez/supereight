@@ -159,8 +159,8 @@ static void renderVolumeKernel(const OctreeT<FieldType, BufferT>& octree,
     const float nearPlane, const float farPlane, const float mu,
     const float step, const float largestep, const Eigen::Vector3f& light,
     const Eigen::Vector3f& ambient, bool render,
-    const se::Image<Eigen::Vector3f>& vertex,
-    const se::Image<Eigen::Vector3f>& normal) {
+    se::Image<Eigen::Vector3f>& vertex,
+    se::Image<Eigen::Vector3f>& normal) {
     TICK();
     int y;
 #pragma omp parallel for shared(out), private(y)

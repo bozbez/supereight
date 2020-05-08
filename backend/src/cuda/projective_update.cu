@@ -2,7 +2,7 @@
 #include "projective_update.hpp"
 
 #include <supereight/algorithms/filter.hpp>
-#include <supereight/backend/cuda_util.hpp>
+#include <supereight/utils/cuda_util.hpp>
 #include <supereight/functors/data_handler.hpp>
 
 #include <cuda_runtime.h>

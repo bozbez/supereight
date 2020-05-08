@@ -5,13 +5,13 @@
 #include "raycast.hpp"
 
 #include <supereight/backend/backend.hpp>
-#include <supereight/backend/cuda_util.hpp>
+#include <supereight/utils/cuda_util.hpp>
 
 #include <cuda_runtime.h>
 
 namespace se {
 
-void Backend::allocate_(const Image<float>& depth, const Eigen::Vector4f& k,
+void Backend::allocate_(Image<float>& depth, const Eigen::Vector4f& k,
     const Eigen::Matrix4f& pose, const Eigen::Vector2i& computation_size,
     float mu) {
     float voxel_size    = octree_.dim() / octree_.size();
@@ -29,14 +29,14 @@ void Backend::allocate_(const Image<float>& depth, const Eigen::Vector4f& k,
 
     allocation_list_.resize(total);
 
-    int allocated = se::buildAllocationList(allocation_list_.accessor(),
-        octree_, allocation_list_used_, pose, getCameraMatrix(k),
-        depth_.accessor(), computation_size, mu);
+    int allocated = se::buildAllocationList(
+        allocation_list_.accessor(Device::CUDA), octree_, allocation_list_used_,
+        pose, getCameraMatrix(k), depth_.accessor(), computation_size, mu);
 
-    octree_.allocate(allocation_list_.accessor().data(), allocated);
+    octree_.allocate(allocation_list_.accessor(Device::CPU).data(), allocated);
 }
 
-void Backend::update_(const Image<float>&, const Sophus::SE3f& Tcw,
+void Backend::update_(Image<float>&, const Sophus::SE3f& Tcw,
     const Eigen::Vector4f& k, const Eigen::Vector2i& computation_size, float mu,
     int frame) {
     float voxel_size = octree_.dim() / octree_.size();
@@ -74,8 +74,7 @@ void Backend::raycast_(Image<Eigen::Vector3f>& vertex,
 
 void Backend::render_(unsigned char* out, const Eigen::Vector2i& output_size,
     const Eigen::Vector4f& k, const Eigen::Matrix4f& pose, float, float mu,
-    const Image<Eigen::Vector3f>&, const Image<Eigen::Vector3f>&,
-    const Eigen::Matrix4f&) {
+    Image<Eigen::Vector3f>&, Image<Eigen::Vector3f>&, const Eigen::Matrix4f&) {
     float step = octree_.dim() / octree_.size();
 
     Eigen::Matrix4f render_view = pose * getInverseCameraMatrix(k);

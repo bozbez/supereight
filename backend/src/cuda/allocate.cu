@@ -1,7 +1,7 @@
 #include "../common/field_impls.hpp"
 #include "allocate.hpp"
 
-#include <supereight/backend/cuda_util.hpp>
+#include <supereight/utils/cuda_util.hpp>
 
 #include <cuda_runtime.h>
 
@@ -9,9 +9,9 @@ namespace se {
 
 template<typename OctreeT>
 __global__ static void buildAllocationListKernel(
-    BufferAccessorCUDA<se::key_t> allocation_list, OctreeT octree,
-    int* voxel_count, Eigen::Matrix4f pose, Eigen::Matrix4f K,
-    BufferAccessorCUDA<float> depth, Eigen::Vector2i frame_size, float mu) {
+    BufferAccessor<se::key_t> allocation_list, OctreeT octree, int* voxel_count,
+    Eigen::Matrix4f pose, Eigen::Matrix4f K, BufferAccessorCUDA<float> depth,
+    Eigen::Vector2i frame_size, float mu) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -44,7 +44,7 @@ __global__ static void buildAllocationListKernel(
         block_depth, voxel_size, inverse_voxel_size, mu);
 }
 
-int buildAllocationList(BufferAccessorCUDA<se::key_t> allocation_list,
+int buildAllocationList(BufferAccessor<se::key_t> allocation_list,
     const Octree<FieldType, MemoryPoolCUDA>& octree, int* voxel_count,
     const Eigen::Matrix4f& pose, const Eigen::Matrix4f& K,
     BufferAccessorCUDA<float> depth, const Eigen::Vector2i& frame_size,

@@ -10,7 +10,7 @@ class BackendBase {
 public:
     BackendBase(int size, float dim);
 
-    void integrate(const Image<float>& depth, const Eigen::Vector4f& k,
+    void integrate(Image<float>& depth, const Eigen::Vector4f& k,
         const Eigen::Matrix4f& pose, const Eigen::Vector2i& computation_size,
         float mu, int frame);
 
@@ -19,8 +19,8 @@ public:
 
     void render(unsigned char* out, const Eigen::Vector2i& output_size,
         const Eigen::Vector4f& k, const Eigen::Matrix4f& pose, float large_step,
-        float mu, const Image<Eigen::Vector3f>& vertex,
-        const Image<Eigen::Vector3f>& normal,
+        float mu, Image<Eigen::Vector3f>& vertex,
+        Image<Eigen::Vector3f>& normal,
         const Eigen::Matrix4f& raycast_pose);
 
 private:
@@ -29,11 +29,11 @@ private:
 protected:
     Octree<FieldType, BufferT> octree_;
 
-    virtual void allocate_(const Image<float>& depth, const Eigen::Vector4f& k,
+    virtual void allocate_(Image<float>& depth, const Eigen::Vector4f& k,
         const Eigen::Matrix4f& pose, const Eigen::Vector2i& computation_size,
         float mu) = 0;
 
-    virtual void update_(const Image<float>& depth, const Sophus::SE3f& Tcw,
+    virtual void update_(Image<float>& depth, const Sophus::SE3f& Tcw,
         const Eigen::Vector4f& k, const Eigen::Vector2i& computation_size,
         float mu, int frame) = 0;
 
@@ -43,8 +43,8 @@ protected:
 
     virtual void render_(unsigned char* out, const Eigen::Vector2i& output_size,
         const Eigen::Vector4f& k, const Eigen::Matrix4f& pose, float large_step,
-        float mu, const Image<Eigen::Vector3f>& vertex,
-        const Image<Eigen::Vector3f>& normal,
+        float mu, Image<Eigen::Vector3f>& vertex,
+        Image<Eigen::Vector3f>& normal,
         const Eigen::Matrix4f& raycast_pose) = 0;
 };
 
@@ -54,7 +54,7 @@ BackendBase<Derived, BufferT>::BackendBase(int size, float dim) {
 }
 
 template<typename Derived, template<typename> class BufferT>
-void BackendBase<Derived, BufferT>::integrate(const Image<float>& depth,
+void BackendBase<Derived, BufferT>::integrate(Image<float>& depth,
     const Eigen::Vector4f& k, const Eigen::Matrix4f& pose,
     const Eigen::Vector2i& computation_size, float mu, int frame) {
     self->allocate_(depth, k, pose, computation_size, mu);
@@ -74,7 +74,7 @@ template<typename Derived, template<typename> class BufferT>
 void BackendBase<Derived, BufferT>::render(unsigned char* out,
     const Eigen::Vector2i& output_size, const Eigen::Vector4f& k,
     const Eigen::Matrix4f& pose, float large_step, float mu,
-    const Image<Eigen::Vector3f>& vertex, const Image<Eigen::Vector3f>& normal,
+    Image<Eigen::Vector3f>& vertex, Image<Eigen::Vector3f>& normal,
     const Eigen::Matrix4f& raycast_pose) {
     self->render_(out, output_size, k, pose, large_step, mu, vertex, normal,
         raycast_pose);

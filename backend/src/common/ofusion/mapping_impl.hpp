@@ -50,9 +50,10 @@ namespace se {
  * \return The value of the interpolated depth at proj.
  */
 SE_DEVICE_FUNC
-inline float interpDepth(
-    const se::Image<float>& depth, const Eigen::Vector2f& proj) {
+inline float interpDepth(se::Image<float>& depth, const Eigen::Vector2f& proj) {
     // https://en.wikipedia.org/wiki/Bilinear_interpolation
+
+    int width = depth.width();
 
     // Pixels version
     const float x1 = (floorf(proj.x()));
@@ -60,10 +61,10 @@ inline float interpDepth(
     const float x2 = (floorf(proj.x() + 1));
     const float y2 = (floorf(proj.y()));
 
-    const float d11 = depth(int(x1), int(y1));
-    const float d12 = depth(int(x1), int(y2));
-    const float d21 = depth(int(x2), int(y1));
-    const float d22 = depth(int(x2), int(y2));
+    const float d11 = depth[int(x1) + int(y1) * width];
+    const float d12 = depth[int(x1) + int(y2) * width];
+    const float d21 = depth[int(x2) + int(y1) * width];
+    const float d22 = depth[int(x2) + int(y2) * width];
 
     if (d11 == 0.f || d12 == 0.f || d21 == 0.f || d22 == 0.f) return 0.f;
 
@@ -85,7 +86,7 @@ inline float interpDepth(
         fabs(d - d21) < interp_thresh && fabs(d - d22) < interp_thresh) {
         return d;
     } else {
-        return depth(int(proj.x() + 0.5f), int(proj.y() + 0.5f));
+        return depth[int(proj.x() + 0.5f) + int(proj.y() + 0.5f) * width];
     }
 }
 
@@ -157,9 +158,8 @@ inline bfusion_update::bfusion_update(const float* d,
       voxelsize(vs) {}
 
 template<typename DataHandlerT>
-SE_DEVICE_ONLY_FUNC
-inline void bfusion_update::operator()(DataHandlerT& handler,
-    const Eigen::Vector3i&, const Eigen::Vector3f& pos,
+SE_DEVICE_ONLY_FUNC inline void bfusion_update::operator()(
+    DataHandlerT& handler, const Eigen::Vector3i&, const Eigen::Vector3f& pos,
     const Eigen::Vector2f& pixel) {
     const Eigen::Vector2i px = pixel.cast<int>();
     const float depthSample  = depth[px.x() + depthSize.x() * px.y()];

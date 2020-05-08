@@ -37,8 +37,8 @@ public:
 
     bool track(const Eigen::Vector4f& k, se::Image<float>& input_depth,
         float icp_threshold, const Eigen::Matrix4f& render_pose,
-        const se::Image<Eigen::Vector3f>& rendered_vertex,
-        const se::Image<Eigen::Vector3f>& rendered_normal);
+        se::Image<Eigen::Vector3f>& rendered_vertex,
+        se::Image<Eigen::Vector3f>& rendered_normal);
 
     void renderTrack(unsigned char* out, const Eigen::Vector2i& output_size);
 };

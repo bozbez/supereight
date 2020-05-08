@@ -10,6 +10,7 @@ Tracker::Tracker(const std::vector<int>& pyramid,
     : pyramid_{pyramid}, computation_size_{computation_size}, pose_{init_pose},
       init_pose_{init_pose} {
     int downsample = 1;
+
     for (auto iteration : pyramid_) {
         std::ignore = iteration;
 
@@ -34,8 +35,8 @@ Tracker::Tracker(const std::vector<int>& pyramid,
 
 bool Tracker::track(const Eigen::Vector4f& k, se::Image<float>& input_depth,
     float icp_threshold, const Eigen::Matrix4f& render_pose,
-    const se::Image<Eigen::Vector3f>& rendered_vertex,
-    const se::Image<Eigen::Vector3f>& rendered_normal) {
+    se::Image<Eigen::Vector3f>& rendered_vertex,
+    se::Image<Eigen::Vector3f>& rendered_normal) {
     std::memcpy(scaled_depth_[0].data(), input_depth.data(),
         sizeof(float) * computation_size_.x() * computation_size_.y());
 

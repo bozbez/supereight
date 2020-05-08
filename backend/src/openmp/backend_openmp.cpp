@@ -6,7 +6,7 @@
 
 namespace se {
 
-void Backend::allocate_(const Image<float>& depth, const Eigen::Vector4f& k,
+void Backend::allocate_(Image<float>& depth, const Eigen::Vector4f& k,
     const Eigen::Matrix4f& pose, const Eigen::Vector2i& computation_size,
     float mu) {
     float voxel_size    = octree_.dim() / octree_.size();
@@ -24,7 +24,7 @@ void Backend::allocate_(const Image<float>& depth, const Eigen::Vector4f& k,
     octree_.allocate(allocation_list_.data(), allocated);
 }
 
-void Backend::update_(const Image<float>& depth, const Sophus::SE3f& Tcw,
+void Backend::update_(Image<float>& depth, const Sophus::SE3f& Tcw,
     const Eigen::Vector4f& k, const Eigen::Vector2i& computation_size, float mu,
     int frame) {
     float voxel_size = octree_.dim() / octree_.size();
@@ -48,8 +48,8 @@ void Backend::raycast_(Image<Eigen::Vector3f>& vertex,
 
 void Backend::render_(unsigned char* out, const Eigen::Vector2i& output_size,
     const Eigen::Vector4f& k, const Eigen::Matrix4f& pose, float large_step,
-    float mu, const Image<Eigen::Vector3f>& vertex,
-    const Image<Eigen::Vector3f>& normal, const Eigen::Matrix4f& raycast_pose) {
+    float mu, Image<Eigen::Vector3f>& vertex,
+    Image<Eigen::Vector3f>& normal, const Eigen::Matrix4f& raycast_pose) {
     float step = octree_.dim() / octree_.size();
 
     renderVolumeKernel(octree_, out, output_size,

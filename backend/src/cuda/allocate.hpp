@@ -39,13 +39,14 @@
 #include <supereight/backend/buffer_cuda.hpp>
 #include <supereight/backend/fields.hpp>
 #include <supereight/backend/memory_pool_cuda.hpp>
+#include <supereight/memory/buffer.hpp>
 #include <supereight/octree.hpp>
 
 #include <Eigen/Dense>
 
 namespace se {
 
-int buildAllocationList(BufferAccessorCUDA<se::key_t> allocation_list,
+int buildAllocationList(BufferAccessor<se::key_t> allocation_list,
     const Octree<FieldType, MemoryPoolCUDA>& octree, int* voxel_count,
     const Eigen::Matrix4f& pose, const Eigen::Matrix4f& K,
     BufferAccessorCUDA<float> depth, const Eigen::Vector2i& frame_size,
