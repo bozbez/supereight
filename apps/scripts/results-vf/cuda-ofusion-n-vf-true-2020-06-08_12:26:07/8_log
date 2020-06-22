@@ -1,0 +1,24 @@
+update compute_size_ratio to 1
+update fps to 0
+update input_file to /media/storage/sequences/rgbd_dataset_freiburg3_long_office_household_validation/scene.raw
+update icp_threshold to 1e-05
+update log_file to ./results/cuda-ofusion-n-vf-true-2020-06-08_12:26:07/8
+update mu to 0.1
+update init_poseFactors to 0.5,0.5,0.3
+update integration_rate to 1
+update map_size to 10.24mx10.24mx10.24m
+update tracking_rate to 1
+update volumetric_size to 1024x1024x1024
+update pyramid levels to 10 5 4 
+update rendering_rate to 1
+update dump_volume_file to ./results/cuda-ofusion-n-vf-true-2020-06-08_12:26:07/8.vtk
+update camera to 535.4,539.2,320.1,247.6
+warning: CPU init for CUDA memory pool page
+==PROF== Connected to process 22844 (/home/joe/Desktop/project/supereight/build/apps/supereight-denseslam-cuda-ofusion-main)
+==PROF== Profiling "1:7:updateBlocksKernel:1000": 0%....50%....100%End of file.
+162
+{"mm2metersKernel" : { "mean":"34451.3018575851", "std":"4269.5368822626", "min":"27291.0000000000", "max":"767601.0000000000", "sum":"89022164.0000000000"}, "halfSampleRobustImageKernel" : { "mean":"77913.9264705882", "std":"16634.4776693483", "min":"28213.0000000000", "max":"402956.0000000000", "sum":"402659172.0000000000"}, "depth2vertexKernel" : { "mean":"50664.1255159959", "std":"20180.4394268315", "min":"8646.0000000000", "max":"1156762.0000000000", "sum":"392748301.0000000000"}, "vertex2normalKernel" : { "mean":"129592.8347523220", "std":"53145.9542321722", "min":"17883.0000000000", "max":"955804.0000000000", "sum":"1004603655.0000000000"}, "trackKernel" : { "mean":"348135.3404111136", "std":"262403.2687649346", "min":"37571.0000000000", "max":"5884899.0000000000", "sum":"13870756368.0000000000"}, "reduceKernel" : { "mean":"121693.0320257009", "std":"78445.9685304689", "min":"31669.0000000000", "max":"5240640.0000000000", "sum":"4848615475.0000000000"}, "updatePoseKernel" : { "mean":"549.6272871019", "std":"226.4822771114", "min":"331.0000000000", "max":"6773.0000000000", "sum":"21898800.0000000000"}, "renderDepthKernel" : { "mean":"238058.4082817337", "std":"130241.8307621744", "min":"136186.0000000000", "max":"9626805.0000000000", "sum":"615142927.0000000000"}, "renderTrackKernel" : { "mean":"183427.6133900929", "std":"41031.2945829731", "min":"132719.0000000000", "max":"4882086.0000000000", "sum":"473976953.0000000000"}, "frame" : { "mean":"1291.5000000000", "std":"189.9619603523", "min":"0.0000000000", "max":"2583.0000000000", "sum":"3337236.0000000000"}, "acquisition" : { "mean":"0.0001702039", "std":"0.0000033579", "min":"0.0001502320", "max":"0.0004336340", "sum":"0.4398068540"}, "preprocessing" : { "mean":"0.0001180724", "std":"0.0000052841", "min":"0.0001105180", "max":"0.0010306850", "sum":"0.3050991460"}, "tracking" : { "mean":"0.0080669082", "std":"0.0004655729", "min":"0.0029472140", "max":"0.0172032200", "sum":"20.8448908130"}, "integration" : { "mean":"0.0027194159", "std":"0.0050131080", "min":"0.0010365260", "max":"1.0011953410", "sum":"7.0269706070"}, "raycasting" : { "mean":"0.0054944265", "std":"0.0002878303", "min":"0.0000000300", "max":"0.0093118630", "sum":"14.1975980510"}, "rendering" : { "mean":"0.0006991502", "std":"0.0001561127", "min":"0.0005264880", "max":"0.0101556380", "sum":"1.8066040430"}, "computation" : { "mean":"0.0163988230", "std":"0.0050662133", "min":"0.0042767400", "max":"1.0185918040", "sum":"42.3745586170"}, "total" : { "mean":"0.0172681771", "std":"0.0050759718", "min":"0.0105382070", "max":"1.0205622440", "sum":"44.6209695140"}, "X" : { "mean":"0.0165656380", "std":"0.3254012097", "min":"-2.1761269569", "max":"2.5316834450", "sum":"42.8056085110"}, "Y" : { "mean":"-0.6877640775", "std":"0.1678172119", "min":"-1.8308305740", "max":"0.3007802963", "sum":"-1777.1823761463"}, "Z" : { "mean":"1.5515072760", "std":"0.3011663682", "min":"-0.4306805134", "max":"3.6705079079", "sum":"4009.0948011875"}, "tracked" : { "mean":"0.9984520124", "std":"0.0100117991", "min":"0.0000000000", "max":"1.0000000000", "sum":"2580.0000000000"}, "integrated" : { "mean":"1.0000000000", "std":"0.0000000000", "min":"1.0000000000", "max":"1.0000000000", "sum":"2584.0000000000"}, "meshing" : { "mean":"0.0000004010", "std":"0.0000000000", "min":"0.0000004010", "max":"0.0000004010", "sum":"0.0000004010"}}
+ - 45 passes
+==PROF== Disconnected from process 22844
+==PROF== Report: ./results/cuda-ofusion-n-vf-true-2020-06-08_12:26:07/8.nsight-cuprof-report
+ate: 0.035542334949101057

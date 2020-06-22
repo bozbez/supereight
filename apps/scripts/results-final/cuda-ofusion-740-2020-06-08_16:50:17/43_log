@@ -1,0 +1,20 @@
+update compute_size_ratio to 1
+update fps to 0
+update input_file to /media/storage/sequences/rgbd_dataset_freiburg1_room/scene.raw
+update icp_threshold to 1e-05
+update log_file to ./results/cuda-ofusion-740-2020-06-08_16:50:17/43
+update mu to 0.1
+update init_poseFactors to 0.5,0.5,0.5
+update integration_rate to 1
+update map_size to 10.24mx10.24mx10.24m
+update tracking_rate to 1
+update volumetric_size to 1024x1024x1024
+update pyramid levels to 10 5 4 
+update rendering_rate to 1
+update dump_volume_file to ./results/cuda-ofusion-740-2020-06-08_16:50:17/43.vtk
+update camera to 517.3,516.5,318.6,255.3
+using the groundtruth file /media/storage/sequences/rgbd_dataset_freiburg1_room/groundtruth_assoc.txt
+warning: CPU init for CUDA memory pool page
+162
+{"mm2metersKernel" : { "mean":"42664.7307692308", "std":"34632.7545234741", "min":"37460.0000000000", "max":"945333.0000000000", "sum":"57682716.0000000000"}, "renderDepthKernel" : { "mean":"516210.6294378698", "std":"407365.8543708739", "min":"267982.0000000000", "max":"4850256.0000000000", "sum":"697916771.0000000000"}, "renderTrackKernel" : { "mean":"185464.9371301775", "std":"17283.8393723691", "min":"165370.0000000000", "max":"425317.0000000000", "sum":"250748595.0000000000"}, "frame" : { "mean":"675.5000000000", "std":"390.1444177054", "min":"0.0000000000", "max":"1351.0000000000", "sum":"913276.0000000000"}, "acquisition" : { "mean":"0.0001325747", "std":"0.0000124011", "min":"0.0001121500", "max":"0.0003660770", "sum":"0.1792410170"}, "preprocessing" : { "mean":"0.0000928281", "std":"0.0000369028", "min":"0.0000814720", "max":"0.0010220160", "sum":"0.1255036420"}, "tracking" : { "mean":"0.0000001986", "std":"0.0000000380", "min":"0.0000001400", "max":"0.0000005210", "sum":"0.0002684790"}, "integration" : { "mean":"0.0107393762", "std":"0.0032639599", "min":"0.0073634080", "max":"0.1026726930", "sum":"14.5196366310"}, "raycasting" : { "mean":"0.0917527943", "std":"0.0170311375", "min":"0.0000000300", "max":"0.1410093560", "sum":"124.0497778610"}, "rendering" : { "mean":"0.0016981946", "std":"0.0040848263", "min":"0.0012264700", "max":"0.0937843240", "sum":"2.2959590640"}, "computation" : { "mean":"0.1025851972", "std":"0.0181022359", "min":"0.0087598680", "max":"0.1755355340", "sum":"138.6951866130"}, "total" : { "mean":"0.1044159665", "std":"0.0181715377", "min":"0.0601177290", "max":"0.1799835660", "sum":"141.1703866940"}, "X" : { "mean":"0.1974296632", "std":"0.8266221412", "min":"-1.1564998627", "max":"1.3873000145", "sum":"266.9249045849"}, "Y" : { "mean":"-0.1829058456", "std":"0.5772187553", "min":"-1.3496999741", "max":"0.8601999283", "sum":"-247.2887032032"}, "Z" : { "mean":"1.4699582073", "std":"0.1072208577", "min":"1.1891002655", "max":"1.6953001022", "sum":"1987.3834962845"}, "tracked" : { "mean":"1.0000000000", "std":"0.0000000000", "min":"1.0000000000", "max":"1.0000000000", "sum":"1352.0000000000"}, "integrated" : { "mean":"1.0000000000", "std":"0.0000000000", "min":"1.0000000000", "max":"1.0000000000", "sum":"1352.0000000000"}, "meshing" : { "mean":"0.0000002810", "std":"0.0000000000", "min":"0.0000002810", "max":"0.0000002810", "sum":"0.0000002810"}}
+ate: 0.0029803305889838884

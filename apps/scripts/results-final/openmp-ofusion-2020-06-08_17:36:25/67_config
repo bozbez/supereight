@@ -1,0 +1,13 @@
+compute-size-ratio: 1
+fps: 0
+icp-threshold: 1e-05
+init-pose: 0.5,0.5,0.5
+integration-rate: 1
+mu: 0.1
+pyramid-levels: 10,5,4
+rendering-rate: 1
+tracking-rate: 1
+trajectory: fr1_room
+version: openmp-ofusion
+volume-resolution: 1024
+volume-size: 10.24
